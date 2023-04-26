@@ -61,7 +61,9 @@ client.once(Events.ClientReady, async bot => {
 // client.login(config.token)
 
 // WEBSOCKET CODE
-ws.on('connection', ws => {
+ws.on('error', console.error)
+
+ws.on('connection', socket => {
 	console.log("New connection!");
 })
 
