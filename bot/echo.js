@@ -11,17 +11,20 @@ import {
 	getVoiceConnection
 } from '@discordjs/voice'
 import { Innertube } from 'youtubei.js'
+import { WebSocket} from 'ws'
 import config from './config.json' assert {type:"json"}
 
 // INITIALIZERS
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
 const player = createAudioPlayer()
 const yt = await Innertube.create()
+const ws = new WebSocket.Server({ port: 3001 })
 
 // MISC SETUP
 const guild_id = "400050413153288192"
 const vc_id = "415922860620644352"
 
+// BOT CODE
 client.once(Events.ClientReady, async bot => {
 	console.log(`Ready! Logged in as ${bot.user.tag}`)
 	
@@ -55,8 +58,14 @@ client.once(Events.ClientReady, async bot => {
 	console.log("PLAYING: " + yt_song.basic_info.author + ' - ' + yt_song.basic_info.title)
 })
 
-client.login(config.token)
+// client.login(config.token)
 
+// WEBSOCKET CODE
+ws.on('connection', ws => {
+	console.log("New connection!");
+})
+
+// META-CODE
 process.on('SIGINT', function() {
 	client.destroy()
 	process.exit()
