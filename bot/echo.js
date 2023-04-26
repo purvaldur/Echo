@@ -35,7 +35,7 @@ client.once(Events.ClientReady, async bot => {
 	})
 	await entersState(voicecon, VoiceConnectionStatus.Ready, 30_000)
 	
-	const yt_search = await yt.search("freitag")
+	const yt_search = await yt.music.search("autoheart moscow")
 	const yt_song = await yt.getInfo(yt_search.results[0].id)
 	const yt_initStream = await yt_song.download()
 	// Buffer the stream to avoid premature end-of-stream
