@@ -29,10 +29,11 @@ const io = new SocketIO(3001, {
 // MISC SETUP
 const guild_id = "400050413153288192"
 const vc_id = "415922860620644352"
+function date() { return new Date().toLocaleTimeString() }
 
 // BOT CODE
 client.once(Events.ClientReady, async bot => {
-	console.log(`Ready! Logged in as ${bot.user.tag}`)
+	console.log(`${date()}: ON-LINE logged in as ${bot.user.tag.toUpperCase()}`)
 	
 	const guild = await client.guilds.fetch(guild_id)
 	const vc = await guild.channels.fetch(vc_id)
@@ -52,7 +53,6 @@ client.login(config.token)
 io.on('connect', async socket => {
 	const id = socket.id
 	const ip = socket.conn.remoteAddress
-	function date() { return new Date().toLocaleTimeString() }
 	console.log(`${date()}: CONNECT from ID ${id} | With IP address ${ip}`)
 
 	socket.on('play', async msg => {
