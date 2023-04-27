@@ -11,15 +11,15 @@ import {
 	getVoiceConnection
 } from '@discordjs/voice'
 import { Innertube } from 'youtubei.js'
-import { Server as io } from 'socket.io'
+import { Server as SocketIO } from 'socket.io'
 import config from './config.json' assert {type:"json"}
 
 // INITIALIZERS
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
 const player = createAudioPlayer()
 const yt = await Innertube.create()
-const ws = new io(3001, {
-	// FOR DEV PURPOSES ONLY! DISABLE CORS IN PROD!
+const io = new SocketIO(3001, {
+// FOR DEV PURPOSES ONLY! DISABLE CORS IN PROD!
 	cors: {
 		origin: "*",
 		methods: ["GET", "POST"]
@@ -64,13 +64,20 @@ client.once(Events.ClientReady, async bot => {
 	console.log("PLAYING: " + yt_song.basic_info.author + ' - ' + yt_song.basic_info.title)
 })
 
-// client.login(config.token)
+client.login(config.token)
 
 // WEBSOCKET CODE
-ws.on('connect', socket => {
+function date() {
+	return new Date().toLocaleTimeString()
+}
+io.on('connect', socket => {
 	const id = socket.id
 	const ip = socket.conn.remoteAddress
-	console.log(new Date().toLocaleTimeString() + ": New connection from " + ip + " with ID " + id);
+	console.log(`${date()}: New connection from ${ip} with ID ${id}`)
+
+	socket.on('ping', msg => {
+		console.log(`${date()}: PING from ${id} with message "${msg}"`)
+	})
 })
 
 // META-CODE
