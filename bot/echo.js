@@ -11,14 +11,19 @@ import {
 	getVoiceConnection
 } from '@discordjs/voice'
 import { Innertube } from 'youtubei.js'
-import { WebSocket} from 'ws'
+import { Server as io } from 'socket.io'
 import config from './config.json' assert {type:"json"}
 
 // INITIALIZERS
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
 const player = createAudioPlayer()
 const yt = await Innertube.create()
-const ws = new WebSocket.Server({ port: 3001 })
+const ws = new io(3001, {
+	cors: {
+		origin: "*",
+		methods: ["GET", "POST"]
+	}
+})
 
 // MISC SETUP
 const guild_id = "400050413153288192"
@@ -61,10 +66,10 @@ client.once(Events.ClientReady, async bot => {
 // client.login(config.token)
 
 // WEBSOCKET CODE
-ws.on('error', console.error)
-
-ws.on('connection', socket => {
-	console.log("New connection!");
+ws.on('connect', socket => {
+	const id = socket.id
+	const ip = socket.conn.remoteAddress
+	console.log(new Date().toLocaleTimeString() + ": New connection from " + ip + " with ID " + id);
 })
 
 // META-CODE
