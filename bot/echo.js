@@ -19,6 +19,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const player = createAudioPlayer()
 const yt = await Innertube.create()
 const ws = new io(3001, {
+	// FOR DEV PURPOSES ONLY! DISABLE CORS IN PROD!
 	cors: {
 		origin: "*",
 		methods: ["GET", "POST"]
