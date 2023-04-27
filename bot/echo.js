@@ -70,12 +70,16 @@ io.on('connect', async socket => {
 // UTIL FUNCTIONS
 const echo = {
     async search(input) {
-        const search = await yt.music.search(input)
-        const result = await yt.getInfo(search.results[0].id)
+        const search = await yt.music.search(input, { type: 'song'})
+        const result = await yt.music.getInfo(search.results[0].id)
         return result
     },
 	async play(input) {
-		const initStream = await input.download()
+		const initStream = await input.download({
+			type: 'audio',
+			quality: 'best',
+			format: 'mp4'
+		})
 		// Buffer the stream to avoid premature end-of-stream
 		const stream = []
 		for await (const chunk of initStream) {

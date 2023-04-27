@@ -1,31 +1,13 @@
 <script setup>
-import { ref } from 'vue'
 import { socket } from '../modules/socket.js'
 
-const song = 'EYE OF THE TIGER'
+const song = ''
 </script>
 
 <template>
-  <h1>Vite + Vue</h1>
-
-  <div class="card">
-    <button type="button" @click="socket.emit('play', song)">PLAY {{ song }}</button>
-    <p>
-      Edit <code>components/HelloWorld.vue</code> to test HMR
-    </p>
+  <h1>ECHO</h1>
+  <div>
+    <input type="text" v-model=song>
+    <button type="button" @click="socket.emit('play', song)">PLAY</button>
   </div>
-
-  <p>
-    Check out <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank">create-vue</a>, the official Vue + Vite starter
-  </p>
-  <p>
-    Install <a href="https://github.com/vuejs/language-tools" target="_blank">Volar</a> in your IDE for a better DX
-  </p>
-  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
 </template>
-
-<style scoped>
-.read-the-docs {
-  color: #888;
-}
-</style>
