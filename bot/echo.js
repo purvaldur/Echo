@@ -43,42 +43,52 @@ client.once(Events.ClientReady, async bot => {
 		adapterCreator: guild.voiceAdapterCreator
 	})
 	await entersState(voicecon, VoiceConnectionStatus.Ready, 30_000)
-	
-	const yt_search = await yt.music.search("autoheart moscow")
-	const yt_song = await yt.getInfo(yt_search.results[0].id)
-	const yt_initStream = await yt_song.download()
-	// Buffer the stream to avoid premature end-of-stream
-	const yt_stream = []
-	for await (const chunk of yt_initStream) {
-		yt_stream.push(chunk)
-	}
-
-	const stream = createAudioResource(yt_stream, {
-		inputType: StreamType.Arbitrary,
-	})
-
 	voicecon.subscribe(player)
-	player.play(stream)
-	await entersState(player, AudioPlayerStatus.Playing, 5_000)
-
-	console.log("PLAYING: " + yt_song.basic_info.author + ' - ' + yt_song.basic_info.title)
 })
 
 client.login(config.token)
 
 // WEBSOCKET CODE
-function date() {
-	return new Date().toLocaleTimeString()
-}
-io.on('connect', socket => {
+io.on('connect', async socket => {
 	const id = socket.id
 	const ip = socket.conn.remoteAddress
+	function date() { return new Date().toLocaleTimeString() }
 	console.log(`${date()}: New connection from ${ip} with ID ${id}`)
 
-	socket.on('ping', msg => {
+	socket.on('ping', async msg => {
 		console.log(`${date()}: PING from ${id} with message "${msg}"`)
+		socket.emit('pong')
+	})
+	socket.on('play', async msg => {
+		console.log(`${date()}: Received 'play' event for song '${msg}'`)
+		const song = await echo.search(msg)
+		echo.play(song)
+		console.log(`PLAYING: ${song.basic_info.author}: ${song.basic_info.title}`)
 	})
 })
+
+// UTIL FUNCTIONS
+const echo = {
+    async search(input) {
+        const search = await yt.music.search(input)
+        const result = await yt.getInfo(search.results[0].id)
+        return result
+    },
+	async play(input) {
+		const initStream = await input.download()
+		// Buffer the stream to avoid premature end-of-stream
+		const stream = []
+		for await (const chunk of initStream) {
+			stream.push(chunk)
+		}
+		const audioRes = createAudioResource(stream, {
+			inputType: StreamType.Arbitrary,
+		})
+		player.play(audioRes)
+		await entersState(player, AudioPlayerStatus.Playing, 5_000)
+		return AudioPlayerStatus.Playing
+	}
+}
 
 // META-CODE
 process.on('SIGINT', function() {
