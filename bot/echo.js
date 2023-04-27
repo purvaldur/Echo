@@ -53,17 +53,13 @@ io.on('connect', async socket => {
 	const id = socket.id
 	const ip = socket.conn.remoteAddress
 	function date() { return new Date().toLocaleTimeString() }
-	console.log(`${date()}: New connection from ${ip} with ID ${id}`)
+	console.log(`${date()}: CONNECT from ID ${id} | With IP address ${ip}`)
 
-	socket.on('ping', async msg => {
-		console.log(`${date()}: PING from ${id} with message "${msg}"`)
-		socket.emit('pong')
-	})
 	socket.on('play', async msg => {
-		console.log(`${date()}: Received 'play' event for song '${msg}'`)
+		console.log(`${date()}: REQUEST from ID ${id} | Searching for '${msg}'`)
 		const song = await echo.search(msg)
 		echo.play(song)
-		console.log(`PLAYING: ${song.basic_info.author}: ${song.basic_info.title}`)
+		console.log(`${date()}: PLAYING from ID ${id} | ${song.basic_info.author} - ${song.basic_info.title}`)
 	})
 })
 
