@@ -1,12 +1,15 @@
 <script setup>
-import { socket } from "../modules/socket.js"
+import { ref } from 'vue'
+import { socket } from '../modules/socket.js'
+
+const song = 'EYE OF THE TIGER'
 </script>
 
 <template>
   <h1>Vite + Vue</h1>
 
   <div class="card">
-    <button type="button" @click="socket.emit('ping', 'world')">JOIN AND PLAY</button>
+    <button type="button" @click="socket.emit('play', song)">PLAY {{ song }}</button>
     <p>
       Edit <code>components/HelloWorld.vue</code> to test HMR
     </p>
