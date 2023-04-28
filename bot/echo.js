@@ -16,7 +16,6 @@ import config from './config.json' assert {type:"json"}
 
 // INITIALIZERS
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
-const player = createAudioPlayer()
 const yt = await Innertube.create()
 const io = new SocketIO(3001, {
 // FOR DEV PURPOSES ONLY! DISABLE CORS IN PROD!
@@ -37,14 +36,25 @@ client.once(Events.ClientReady, async bot => {
 	
 	const guild = await client.guilds.fetch(guild_id)
 	const vc = await guild.channels.fetch(vc_id)
+    
+    client.echo = {
+        guilds: {
+            [guild_id]: {
+                queue: [],
+                player: createAudioPlayer()
+            }
+        }
+    }
 
 	const voicecon = joinVoiceChannel({
 		channelId: vc.id,
 		guildId: guild.id,
 		adapterCreator: guild.voiceAdapterCreator
 	})
+
 	await entersState(voicecon, VoiceConnectionStatus.Ready, 30_000)
-	voicecon.subscribe(player)
+	voicecon.subscribe(client.echo.guilds[guild_id].player)
+    client.echo.guilds[guild_id].voicecon = voicecon
 })
 
 client.login(config.token)
@@ -58,8 +68,11 @@ io.on('connect', async socket => {
 	socket.on('play', async msg => {
 		console.log(`${date()}: REQUEST from ID ${id} | Searching for '${msg}'`)
 		const song = await echo.search(msg)
-		echo.play(song)
-		console.log(`${date()}: PLAYING from ID ${id} | ${song.basic_info.author} - ${song.basic_info.title}`)
+        if (client.echo.guilds[guild_id].queue.length == 0) {
+            echo.play(song)
+            console.log(`${date()}: PLAYING from ID ${id} | ${song.basic_info.author} - ${song.basic_info.title}`)
+        }
+        client.echo.guilds[guild_id].queue.push(song)
 	})
 })
 
@@ -84,9 +97,9 @@ const echo = {
 		const audioRes = createAudioResource(stream, {
 			inputType: StreamType.Arbitrary,
 		})
-		player.play(audioRes)
-		await entersState(player, AudioPlayerStatus.Playing, 5_000)
-		return AudioPlayerStatus.Playing
+		client.echo.guilds[guild_id].player.play(audioRes)
+		await entersState(client.echo.guilds[guild_id].player, AudioPlayerStatus.Playing, 5_000)
+		return
 	}
 }
 
@@ -94,4 +107,4 @@ const echo = {
 process.on('SIGINT', function() {
 	client.destroy()
 	process.exit()
-});
+})
