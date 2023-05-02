@@ -34,22 +34,36 @@ function date() { return new Date().toLocaleTimeString() }
 client.once(Events.ClientReady, async bot => {
 	console.log(`${date()}: ON-LINE logged in as ${bot.user.tag.toUpperCase()}`)
 	
-	const guild = await client.guilds.fetch(guild_id)
-	const vc = await guild.channels.fetch(vc_id)
+	const gamer = await client.guilds.fetch(guild_id)
+	const vc = await gamer.channels.fetch(vc_id)
     
     client.echo = {
-        guilds: {
-            [guild_id]: {
-                queue: [],
-                player: createAudioPlayer()
-            }
+        guilds: {}
+    }
+
+    for (const guild of await client.guilds.fetch()) {
+        client.echo.guilds[guild[0]] = {
+            id: guild[1].id,
+            name: guild[1].name,
+            queue: [],
+            player: createAudioPlayer()
         }
+        client.echo.guilds[guild[0]].player.on('stateChange', (oldState, newState) => {
+            console.log(`${date()}: Audio player for ${client.echo.guilds[guild[0]].name} has changed from ${oldState.status} to ${newState.status}`);
+            if (
+            oldState.status == 'playing' && newState.status == 'idle') {
+                client.echo.guilds[guild[0]].queue.shift()
+                if (client.echo.guilds[guild[0]].queue.length > 0) {
+                    echo.play(client.echo.guilds[guild[0]].queue[0])
+                }
+            }
+        })
     }
 
 	const voicecon = joinVoiceChannel({
 		channelId: vc.id,
-		guildId: guild.id,
-		adapterCreator: guild.voiceAdapterCreator
+		guildId: gamer.id,
+		adapterCreator: gamer.voiceAdapterCreator
 	})
 
 	await entersState(voicecon, VoiceConnectionStatus.Ready, 30_000)
@@ -63,14 +77,14 @@ client.login(config.token)
 io.on('connect', async socket => {
 	const id = socket.id
 	const ip = socket.conn.remoteAddress
-	console.log(`${date()}: CONNECT from ID ${id} | With IP address ${ip}`)
+	console.log(`${date()}: New connection from ID ${id} with IP address ${ip}`)
 
 	socket.on('play', async msg => {
-		console.log(`${date()}: REQUEST from ID ${id} | Searching for '${msg}'`)
+		console.log(`${date()}: New request from ID ${id} for '${msg}'`)
 		const song = await echo.search(msg)
+        song.requester = socket.id
         if (client.echo.guilds[guild_id].queue.length == 0) {
             echo.play(song)
-            console.log(`${date()}: PLAYING from ID ${id} | ${song.basic_info.author} - ${song.basic_info.title}`)
         }
         client.echo.guilds[guild_id].queue.push(song)
 	})
@@ -97,9 +111,10 @@ const echo = {
 		const audioRes = createAudioResource(stream, {
 			inputType: StreamType.Arbitrary,
 		})
+        console.log(`${date()}: Now playing '${input.basic_info.author} - ${input.basic_info.title}', requested by ${input.requester}`)
 		client.echo.guilds[guild_id].player.play(audioRes)
 		await entersState(client.echo.guilds[guild_id].player, AudioPlayerStatus.Playing, 5_000)
-		return
+		return client.echo.guilds[guild_id].player
 	}
 }
 
