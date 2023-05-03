@@ -25,5 +25,4 @@ dist-ssr
 
 # custom
 config.json
-package-lock.json
 .DS_Store
