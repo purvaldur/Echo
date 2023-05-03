@@ -1,3 +1,5 @@
+#!/bin/bash
+
 FROM node:20.0.0-alpine3.17
 
 # ENV NODE_ENV=production
