@@ -1,6 +1,4 @@
-#!/bin/bash
-
-FROM node:20.0.0-alpine3.17
+FROM --platform=linux/amd64 node:20.0.0-alpine3.17
 
 # ENV NODE_ENV=production
 ENV WEB_WSS_SERVER=192.168.64.6
