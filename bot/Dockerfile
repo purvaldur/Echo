@@ -1,6 +1,6 @@
 FROM node:20.0.0-alpine3.17
 ENV NODE_ENV=production
-WORKDIR /app
+WORKDIR /app/echo/bot
 
 COPY ["package.json", "package-lock.json*", "./"]
 
@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 3001
 
-CMD ["node", "echo.js"]
+CMD ["node", "--no-warnings", "echo.js"]
