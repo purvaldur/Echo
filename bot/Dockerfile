@@ -1,4 +1,4 @@
-FROM node:20.0.0-alpine3.17
+FROM --platform=linux/amd64 node:20.0.0-alpine3.17
 
 WORKDIR /app/echo/bot
 
