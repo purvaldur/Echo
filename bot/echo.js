@@ -71,7 +71,7 @@ client.once(Events.ClientReady, async bot => {
     client.echo.guilds[guild_id].voicecon = voicecon
 })
 
-client.login(config.token)
+client.login(process.env.BOT_TOKEN)
 
 // WEBSOCKET CODE
 io.on('connect', async socket => {
