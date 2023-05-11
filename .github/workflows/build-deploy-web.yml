@@ -1,4 +1,4 @@
-name: Build echo bot container image
+name: Build echo web container image
 
 on:
   release:
@@ -6,10 +6,11 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: echo-bot
+  IMAGE_NAME: echo-web
 
 jobs:
   build-and-push-image:
+    if: startsWtih(github.event.release.tag_name, 'echo-web.v')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -38,7 +39,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
-          context: bot/
+          context: web/
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels}}
