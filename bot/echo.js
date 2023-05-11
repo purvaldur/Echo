@@ -26,6 +26,8 @@ const io = new SocketIO(3001, {
 })
 
 // MISC SETUP
+const client_id = "508723276445646868"
+const client_secret = process.env.BOT_TOKEN
 const guild_id = "400050413153288192"
 const vc_id = "415922860620644352"
 function date() { return new Date().toLocaleTimeString() }
@@ -71,7 +73,7 @@ client.once(Events.ClientReady, async bot => {
     client.echo.guilds[guild_id].voicecon = voicecon
 })
 
-client.login(process.env.BOT_TOKEN)
+client.login(client_secret)
 
 // WEBSOCKET CODE
 io.on('connect', async socket => {
